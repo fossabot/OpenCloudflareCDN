@@ -23,9 +23,6 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      - name: Update dependencies
-        run: go get all
-
       - name: Update go.sum
         run: go mod tidy
 
