@@ -18,6 +18,7 @@ var Instance *zap.Logger
 
 func Init() {
 	Instance = NewLog(config.Instance.Log)
+	zap.RedirectStdLog(Instance)
 }
 
 func NewLog(cfg config.Log) *zap.Logger {

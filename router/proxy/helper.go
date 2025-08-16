@@ -20,8 +20,10 @@ func Request(ctx *gin.Context) {
 
 	var rt http.RoundTripper
 
+	tlsConfig := &tls.Config{InsecureSkipVerify: true} //nolint:gosec
+
 	h3 := &http3.RoundTripper{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: tlsConfig,
 	}
 	if res, err := h3.RoundTrip(&http.Request{
 		Method: http.MethodHead,
@@ -31,7 +33,7 @@ func Request(ctx *gin.Context) {
 		rt = h3
 	} else {
 		rt = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			TLSClientConfig: tlsConfig,
 		}
 	}
 
