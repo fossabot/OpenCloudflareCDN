@@ -4,6 +4,7 @@ import i18n from "i18next";
 import {useRef, useState} from "react";
 import {Trans, useTranslation} from "react-i18next";
 import {genRayID, getRootDomain} from "@/util/cloudflare";
+import {LoadingSpinner} from "@/components/LoadingSpinner/LoadingSpinner";
 
 interface AppProps {
     siteKey: string | null | undefined;
@@ -16,6 +17,7 @@ type VerificationStatus = 'verify' | 'success' | 'error' | 'expire';
 export function OpenCloudflareCDN({rayID, siteKey, successCallback}: AppProps) {
     const {t} = useTranslation();
     const [status, setStatus] = useState<VerificationStatus>('verify');
+    const [isTurnstileLoaded, setIsTurnstileLoaded] = useState(false);
     const turnstileRef = useRef<TurnstileInstance>(null);
     const domain = getRootDomain();
     const rid = rayID || genRayID();
@@ -38,29 +40,27 @@ export function OpenCloudflareCDN({rayID, siteKey, successCallback}: AppProps) {
                             <div id="challenge-error-text" className="h2">{t(`challenge_${status}`)}</div>
                             <div className="spacer"></div>
                             <div className="core-msg spacer">{t(`challenge_${status}_description`)}</div>
-                            <div className="retry-wrapper">
-                                <button className="retry-button" onClick={() => {
-                                    setStatus('verify');
-                                    turnstileRef.current?.reset();
-                                }}>{t('retry')}</button>
-                            </div>
                         </div>
                     ) : (
                         <div>
                             <p className="h2 spacer-bottom">{t('verify')}</p>
-                            <Turnstile
-                                ref={turnstileRef}
-                                siteKey={siteKey || '1x00000000000000000000AA'}
-                                onSuccess={(token) => {
-                                    setStatus('success');
-                                    void successCallback(token, rid);
-                                }}
-                                onError={() => setStatus('error')}
-                                onExpire={() => setStatus('expire')}
-                                options={{
-                                    language: i18n.language,
-                                }}
-                            />
+                            <div className="turnstile-container">
+                                {!isTurnstileLoaded && <LoadingSpinner />}
+                                <Turnstile
+                                    ref={turnstileRef}
+                                    siteKey={siteKey || '1x00000000000000000000AA'}
+                                    onSuccess={(token) => {
+                                        setStatus('success');
+                                        void successCallback(token, rid);
+                                    }}
+                                    onError={() => setStatus('error')}
+                                    onExpire={() => setStatus('expire')}
+                                    onLoad={() => setIsTurnstileLoaded(true)}
+                                    options={{
+                                        language: i18n.language,
+                                    }}
+                                />
+                            </div>
                             <p className="core-msg spacer-top">{t('check_connection', {domain})}</p>
                         </div>
                     )}
