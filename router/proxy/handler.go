@@ -58,12 +58,14 @@ func Proxy() gin.HandlerFunc {
 			return
 		}
 
-		if claims["ip"] != ctx.ClientIP() || claims["ua"] != ctx.Request.UserAgent() {
+		clientIP, ok1 := claims["ip"].(string)
+		userAgent, ok2 := claims["ua"].(string)
+		if !ok1 || !ok2 || clientIP != ctx.ClientIP() || userAgent != ctx.Request.UserAgent() {
 			log.Instance.Warn(
 				"P >> Token information mismatch",
-				zap.String("tokenIP", claims["ip"].(string)),
+				zap.String("tokenIP", clientIP),
 				zap.String("requestIP", ctx.ClientIP()),
-				zap.String("tokenUA", claims["ua"].(string)),
+				zap.String("tokenUA", userAgent),
 				zap.String("requestUA", ctx.Request.UserAgent()),
 				zap.String("ctx", util.GinContextString(ctx)),
 			)
@@ -75,6 +77,7 @@ func Proxy() gin.HandlerFunc {
 		remote, err := url.Parse(config.Instance.OriginalServer)
 		if err != nil {
 			_ = ctx.Error(err)
+
 			return
 		}
 

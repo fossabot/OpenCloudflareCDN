@@ -24,6 +24,7 @@ func APIVerify() gin.HandlerFunc {
 
 			return
 		}
+
 		res := gjson.Parse(util.BytesToString(bodyBytes))
 
 		log.Instance.Info("V >> Turnstile verification request", zap.String("rayID", res.Get("rayID").String()), zap.String("ctx", util.GinContextString(ctx)))

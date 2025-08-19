@@ -45,6 +45,7 @@ func Start(engine *gin.Engine) error {
 	if config.Instance.Server.TLS.Cert != "" && config.Instance.Server.TLS.Key != "" {
 		g.Go(func() error {
 			log.Instance.Info("Listening on TLS", zap.String("address", config.Instance.Server.Address))
+
 			return server.ListenAndServeTLS(config.Instance.Server.TLS.Cert, config.Instance.Server.TLS.Key)
 		})
 		g.Go(func() error {
@@ -76,8 +77,9 @@ func Start(engine *gin.Engine) error {
 			redirectEngine.Use(middlewarehttp.Handler(httpsPort))
 
 			httpServer := &http.Server{
-				Addr:    config.Instance.Server.HttpAddress,
-				Handler: redirectEngine,
+				Addr:              config.Instance.Server.HttpAddress,
+				Handler:           redirectEngine,
+				ReadHeaderTimeout: 30 * time.Second,
 			}
 
 			log.Instance.Info("Listening on HTTP", zap.String("address", config.Instance.Server.HttpAddress))

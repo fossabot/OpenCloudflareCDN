@@ -48,10 +48,10 @@ type Log struct {
 }
 
 type Server struct {
-	Address     string `json:"address" yaml:"address"`
-	Header      string `json:"header"  optional:"true" yaml:"header"`
+	Address     string `json:"address"     yaml:"address"`
+	Header      string `json:"header"      optional:"true" yaml:"header"`
 	HttpAddress string `json:"httpAddress" optional:"true" yaml:"httpAddress"`
-	TLS         TLS    `json:"tls"     optional:"true" yaml:"tls"`
+	TLS         TLS    `json:"tls"         optional:"true" yaml:"tls"`
 }
 
 type TLS struct {
