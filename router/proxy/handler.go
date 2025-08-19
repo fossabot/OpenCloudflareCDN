@@ -1,7 +1,11 @@
 package proxy
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
 
 	"github.com/Sn0wo2/OpenCloudflareCDN/config"
 	"github.com/Sn0wo2/OpenCloudflareCDN/internal/util"
@@ -15,7 +19,7 @@ func Proxy() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenStr, err := ctx.Cookie("__ocfc_v")
 		if err != nil {
-			log.Instance.Info("No token, not proxying",
+			log.Instance.Info("P >> No token, not proxying",
 				zap.String("ctx", util.GinContextString(ctx)),
 				zap.Error(err),
 			)
@@ -32,7 +36,7 @@ func Proxy() gin.HandlerFunc {
 			return util.StringToBytes(config.Instance.JWTSecret), nil
 		})
 		if err != nil || !t.Valid {
-			log.Instance.Error("Invalid token, not proxying",
+			log.Instance.Error("P >> Invalid token, not proxying",
 				zap.String("token", tokenStr),
 				zap.String("ctx", util.GinContextString(ctx)),
 			)
@@ -46,6 +50,47 @@ func Proxy() gin.HandlerFunc {
 			return
 		}
 
-		Request(ctx)
+		claims, ok := t.Claims.(jwt.MapClaims)
+		if !ok {
+			log.Instance.Error("P >> Invalid token claims, not proxying", zap.String("ctx", util.GinContextString(ctx)))
+			ctx.Next()
+
+			return
+		}
+
+		if claims["ip"] != ctx.ClientIP() || claims["ua"] != ctx.Request.UserAgent() {
+			log.Instance.Warn(
+				"P >> Token information mismatch",
+				zap.String("tokenIP", claims["ip"].(string)),
+				zap.String("requestIP", ctx.ClientIP()),
+				zap.String("tokenUA", claims["ua"].(string)),
+				zap.String("requestUA", ctx.Request.UserAgent()),
+				zap.String("ctx", util.GinContextString(ctx)),
+			)
+			ctx.Next()
+
+			return
+		}
+
+		remote, err := url.Parse(config.Instance.OriginalServer)
+		if err != nil {
+			_ = ctx.Error(err)
+			return
+		}
+
+		log.Instance.Info("P >> Proxying request", zap.String("target", remote.String()), zap.String("protocol", "HTTP/2"), zap.String("ctx", util.GinContextString(ctx)))
+
+		proxy := httputil.NewSingleHostReverseProxy(remote)
+		proxy.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+		}
+		proxy.Director = func(req *http.Request) {
+			req.Header = ctx.Request.Header
+			req.Host = remote.Host
+			req.URL.Scheme = remote.Scheme
+			req.URL.Host = remote.Host
+			req.URL.Path = ctx.Request.URL.Path
+		}
+		proxy.ServeHTTP(ctx.Writer, ctx.Request)
 	}
 }
