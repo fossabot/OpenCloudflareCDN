@@ -23,6 +23,7 @@ func Init(router *gin.Engine) {
 	v1 := router.Group("/v1")
 	{
 		v1.Any("/health", handler.APIHealth())
+		v1.Any("/info", handler.APIInfo())
 		v1.Any("/verify", handler.APIVerify())
 	}
 
