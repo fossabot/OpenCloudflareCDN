@@ -4,7 +4,10 @@ import (
 	"net/http"
 
 	"github.com/Sn0wo2/OpenCloudflareCDN/config"
+	"github.com/Sn0wo2/OpenCloudflareCDN/internal/util"
+	"github.com/Sn0wo2/OpenCloudflareCDN/log"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func Handle() gin.HandlerFunc {
@@ -24,8 +27,8 @@ func Handle() gin.HandlerFunc {
 				return
 			}
 
+			log.Instance.Info("S >> Static file served", zap.String("file", filePath), zap.String("ctx", util.GinContextString(ctx)))
 			ctx.File(filePath)
-			ctx.Abort()
 		}
 	}
 }
