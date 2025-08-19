@@ -20,7 +20,7 @@ func New(msg string, data ...any) *Response {
 	case 1:
 		return &Response{
 			Msg:  msg,
-			Data: data,
+			Data: data[0],
 		}
 	default:
 		return &Response{
