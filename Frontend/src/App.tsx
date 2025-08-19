@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { OpenCloudflareCDN } from "@/OpenCloudflareCDN.tsx";
-import { LoadingSpinner } from "@/components/LoadingSpinner/LoadingSpinner.tsx";
-import { genRayID } from "@/util/cloudflare.ts";
+import {LoadingSpinner} from "@/components/LoadingSpinner/LoadingSpinner.tsx";
+import {OpenCloudflareCDN} from "@/OpenCloudflareCDN.tsx";
+import {genRayID} from "@/util/cloudflare.ts";
+import {useEffect, useState} from "react";
 
 export const App = () => {
   const [info, setInfo] = useState<{ siteKey: string; rayID: string } | null>(
@@ -24,7 +24,7 @@ export const App = () => {
         if (data.success) {
           setInfo(data.data);
         } else {
-          console.error(data.msg);``
+            console.error(data.msg);
         }
       } catch (err) {
         console.error(err);
