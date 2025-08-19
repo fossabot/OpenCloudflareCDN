@@ -1,12 +1,14 @@
 package framework
 
 import (
+	"net"
 	"net/http"
 	"time"
 
 	"github.com/Sn0wo2/OpenCloudflareCDN/config"
 	"github.com/Sn0wo2/OpenCloudflareCDN/debug"
 	"github.com/Sn0wo2/OpenCloudflareCDN/log"
+	middlewarehttp "github.com/Sn0wo2/OpenCloudflareCDN/middleware/http"
 	"github.com/gin-gonic/gin"
 	"github.com/quic-go/quic-go"
 	"github.com/quic-go/quic-go/http3"
@@ -23,34 +25,9 @@ func Gin() *gin.Engine {
 
 	engine.Use(gin.Recovery())
 
-	engine.Use(ZapLogger())
-
 	engine.HandleMethodNotAllowed = true
 
 	return engine
-}
-
-func ZapLogger() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		start := time.Now()
-		path := ctx.Request.URL.Path
-		raw := ctx.Request.URL.RawQuery
-
-		ctx.Next()
-
-		if raw != "" {
-			path = path + "?" + raw
-		}
-
-		log.Instance.Info("GIN",
-			zap.Int("status", ctx.Writer.Status()),
-			zap.Duration("latency", time.Since(start)),
-			zap.String("clientIP", ctx.ClientIP()),
-			zap.String("method", ctx.Request.Method),
-			zap.String("path", path),
-			zap.String("error", ctx.Errors.ByType(gin.ErrorTypePrivate).String()),
-		)
-	}
 }
 
 func Start(engine *gin.Engine) error {
@@ -66,11 +43,10 @@ func Start(engine *gin.Engine) error {
 	}
 
 	if config.Instance.Server.TLS.Cert != "" && config.Instance.Server.TLS.Key != "" {
-		// http2 and http1
 		g.Go(func() error {
+			log.Instance.Info("Listening on TLS", zap.String("address", config.Instance.Server.Address))
 			return server.ListenAndServeTLS(config.Instance.Server.TLS.Cert, config.Instance.Server.TLS.Key)
 		})
-		// http3
 		g.Go(func() error {
 			h3Server := &http3.Server{
 				Addr:    config.Instance.Server.Address,
@@ -81,11 +57,32 @@ func Start(engine *gin.Engine) error {
 				},
 			}
 
+			log.Instance.Info("Listening on QUIC", zap.String("address", config.Instance.Server.Address))
+
 			return h3Server.ListenAndServeTLS(config.Instance.Server.TLS.Cert, config.Instance.Server.TLS.Key)
 		})
 	} else {
+		log.Instance.Info("Listening on HTTP", zap.String("address", config.Instance.Server.Address))
+
 		g.Go(func() error {
 			return server.ListenAndServe()
+		})
+	}
+
+	if config.Instance.Server.HttpAddress != "" {
+		g.Go(func() error {
+			redirectEngine := gin.New()
+			_, httpsPort, _ := net.SplitHostPort(config.Instance.Server.Address)
+			redirectEngine.Use(middlewarehttp.Handler(httpsPort))
+
+			httpServer := &http.Server{
+				Addr:    config.Instance.Server.HttpAddress,
+				Handler: redirectEngine,
+			}
+
+			log.Instance.Info("Listening on HTTP", zap.String("address", config.Instance.Server.HttpAddress))
+
+			return httpServer.ListenAndServe()
 		})
 	}
 

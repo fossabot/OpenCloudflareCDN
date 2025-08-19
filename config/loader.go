@@ -18,12 +18,13 @@ var DefaultConfig = &Config{
 		Dir:   "./logs",
 	},
 	Server: Server{
-		Address: ":3000",
-		Header:  "OpenCloudflareCDN",
+		Address:     ":443",
+		Header:      "OpenCloudflareCDN",
+		HttpAddress: ":80",
 	},
 	StaticPath:     "./static",
 	StaticIndex:    "index.html",
-	OriginalServer: "https://www.example.com",
+	OriginalServer: "https://example.com",
 	JWTSecret:      "your-super-secret-and-long-key",
 }
 
@@ -36,6 +37,7 @@ type Config struct {
 	StaticPath         string `json:"staticPath"         yaml:"staticPath"`
 	StaticIndex        string `json:"staticIndex"        optional:"true"           yaml:"staticIndex"`
 	OriginalServer     string `json:"OriginalServer"     yaml:"OriginalServer"`
+	TurnstileSiteKey   string `json:"turnstileSiteKey"   yaml:"turnstileSiteKey"`
 	TurnstileSecretKey string `json:"turnstileSecretKey" yaml:"turnstileSecretKey"`
 	JWTSecret          string `json:"jwtSecret"          yaml:"jwtSecret"`
 }
@@ -46,9 +48,10 @@ type Log struct {
 }
 
 type Server struct {
-	Address string `json:"address" yaml:"address"`
-	Header  string `json:"header"  optional:"true" yaml:"header"`
-	TLS     TLS    `json:"tls"     optional:"true" yaml:"tls"`
+	Address     string `json:"address" yaml:"address"`
+	Header      string `json:"header"  optional:"true" yaml:"header"`
+	HttpAddress string `json:"httpAddress" optional:"true" yaml:"httpAddress"`
+	TLS         TLS    `json:"tls"     optional:"true" yaml:"tls"`
 }
 
 type TLS struct {
