@@ -3,7 +3,8 @@ import type {Response as ApiResponse, VerifyPayload} from "@/service/types.ts";
 async function safeJsonParse<T>(res: globalThis.Response): Promise<T | null> {
     try {
         return await res.json() as T;
-    } catch (_) {
+    } catch (err) {
+        console.error(err);
         return null;
     }
 }
