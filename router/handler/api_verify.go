@@ -29,7 +29,7 @@ func APIVerify() gin.HandlerFunc {
 
 		log.Instance.Info("V >> Turnstile verification request", zap.String("rayID", res.Get("rayID").String()), zap.String("ctx", util.GinContextString(ctx)))
 
-		resp, err := http.PostForm("https://challenges.cloudflare.com/turnstile/v0/siteverify", url.Values{"secret": {config.Instance.TurnstileSecretKey}, "response": {res.Get("turnstileToken").String()}})
+		resp, err := http.PostForm("https://challenges.cloudflare.com/turnstile/v0/siteverify", url.Values{"secret": {config.Instance.TurnstileSecretKey}, "response": {res.Get("token").String()}})
 		if err != nil {
 			_ = ctx.Error(err)
 
