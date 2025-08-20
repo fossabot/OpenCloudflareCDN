@@ -1,4 +1,4 @@
-# OpenCloudflareCDN
+# 🛡️ OpenCloudflareCDN
 
 > An open-source reverse proxy inspired by [Cloudflare](https://www.cloudflare.com), featuring a JavaScript Challenge to block malicious bots, web crawlers, and mitigate CC attacks.
 
@@ -6,5 +6,18 @@
 [![GitHub release](https://img.shields.io/github/v/release/Sn0wo2/OpenCloudflareCDN?color=blue)](https://github.com/Sn0wo2/OpenCloudflareCDN/releases)
 [![GitHub License](https://img.shields.io/github/license/Sn0wo2/OpenCloudflareCDN)](LICENSE)
 
+[![Go CI](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/go.yml/badge.svg)](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/go.yml)
+[![React CI](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/react.yml/badge.svg)](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/react.yml)
+[![Release](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/release.yml/badge.svg)](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/release.yml)
+[![Dependabot Updates](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/dependabot/dependabot-updates)
+[![CodeQL Advanced](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/codeql.yml/badge.svg)](https://github.com/Sn0wo2/OpenCloudflareCDN/actions/workflows/codeql.yml)
 
 ---
+
+# 🛠️ Project status
+
+- **Developing**...
+
+---
+
+...
