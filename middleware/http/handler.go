@@ -24,6 +24,7 @@ func Handler(httpsPort string) gin.HandlerFunc {
 
 		targetURL := "https://" + targetHost + ctx.Request.RequestURI
 		log.Instance.Info("Redirecting to HTTPS", zap.String("url", targetURL))
+		ctx.Header("Location", targetURL)
 		response.New(
 			"follow url to https",
 			gin.H{
