@@ -1,70 +1,73 @@
-import {Turnstile, type TurnstileInstance} from "@marsidev/react-turnstile";
+import ErrorView from "@/components/VerificationViews/ErrorView";
+import SuccessView from "@/components/VerificationViews/SuccessView";
+import VerifyView from "@/components/VerificationViews/VerifyView";
+import {getRootDomain} from "@/util/cloudflare";
 import "@/OpenCloudflareCDN.scss";
 import i18n from "i18next";
-import {useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Trans, useTranslation} from "react-i18next";
-import {genRayID, getRootDomain} from "@/util/cloudflare";
-import {LoadingSpinner} from "@/components/LoadingSpinner/LoadingSpinner";
+
+export type VerificationStatus = 'verify' | 'success' | 'error' | 'expire';
 
 interface AppProps {
     siteKey: string | null | undefined;
     successCallback: (token: string, rayID: string) => Promise<void>;
     rayID: string | null | undefined;
+    status?: VerificationStatus;
 }
 
-type VerificationStatus = 'verify' | 'success' | 'error' | 'expire';
-
-export function OpenCloudflareCDN({rayID, siteKey, successCallback}: AppProps) {
+const OpenCloudflareCDNComponent: React.FC<AppProps> = ({
+                                                            rayID,
+                                                            siteKey,
+                                                            successCallback,
+                                                            status: initialStatus = 'verify'
+                                                        }) => {
     const {t} = useTranslation();
-    const [status, setStatus] = useState<VerificationStatus>('verify');
+    const [status, setStatus] = useState<VerificationStatus>(initialStatus);
+    useEffect(() => {
+        setStatus(initialStatus)
+    }, [initialStatus]);
     const [isTurnstileLoaded, setIsTurnstileLoaded] = useState(false);
-    const turnstileRef = useRef<TurnstileInstance>(null);
     const domain = getRootDomain();
-    const rid = rayID || genRayID();
+    const rid = status === 'error' ? "Unknown" : rayID || "Loading...";
+    const noCaptcha = !siteKey;
 
     document.title = i18n.t('page_title');
+
+    const renderContent = () => {
+        if (status === 'success') {
+            return <SuccessView t={t} domain={domain}/>;
+        }
+        if (status === 'error' || status === 'expire') {
+            return <ErrorView t={t} status={status}/>;
+        }
+        return (
+            <VerifyView
+                t={t}
+                domain={domain}
+                isTurnstileLoaded={isTurnstileLoaded}
+                noCaptcha={noCaptcha}
+                siteKey={siteKey}
+                onSuccess={(token) => {
+                    setStatus('success');
+                    void successCallback(token, rid);
+                }}
+                onError={() => setStatus('error')}
+                onExpire={() => setStatus('expire')}
+                onLoad={() => setIsTurnstileLoaded(true)}
+            />
+        );
+    };
 
     return (
         <>
             <div className="main-wrapper" role="main">
                 <div className="main-content">
                     <h1 className="zone-name-title h1">{domain}</h1>
-                    {status === 'success' ? (
-                        <div>
-                            <div id="challenge-success-text" className="h2">{t('challenge_success')}</div>
-                            <div className="spacer"></div>
-                            <div className="core-msg spacer">{t('waiting', {domain})}</div>
-                        </div>
-                    ) : status === 'error' || status === 'expire' ? (
-                        <div>
-                            <div id="challenge-error-text" className="h2">{t(`challenge_${status}`)}</div>
-                            <div className="spacer"></div>
-                            <div className="core-msg spacer">{t(`challenge_${status}_description`)}</div>
-                        </div>
-                    ) : (
-                        <div>
-                            <p className="h2 spacer-bottom">{t('verify')}</p>
-                            <div className="turnstile-container">
-                                {!isTurnstileLoaded && <LoadingSpinner />}
-                                <Turnstile
-                                    ref={turnstileRef}
-                                    siteKey={siteKey || '1x00000000000000000000AA'}
-                                    onSuccess={(token) => {
-                                        setStatus('success');
-                                        void successCallback(token, rid);
-                                    }}
-                                    onError={() => setStatus('error')}
-                                    onExpire={() => setStatus('expire')}
-                                    onLoad={() => setIsTurnstileLoaded(true)}
-                                    options={{
-                                        language: i18n.language,
-                                    }}
-                                />
-                            </div>
-                            <p className="core-msg spacer-top">{t('check_connection', {domain})}</p>
-                        </div>
-                    )}
+                    {renderContent()}
                 </div>
+            </div>
+            <div className="footer" role="contentinfo">
             </div>
             <div className="footer" role="contentinfo">
                 <div className="footer-inner">
@@ -84,4 +87,6 @@ export function OpenCloudflareCDN({rayID, siteKey, successCallback}: AppProps) {
             </div>
         </>
     );
-}
+};
+
+export const OpenCloudflareCDN = React.memo(OpenCloudflareCDNComponent);
