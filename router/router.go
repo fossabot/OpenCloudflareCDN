@@ -7,12 +7,14 @@ import (
 	"github.com/Sn0wo2/OpenCloudflareCDN/router/proxy"
 	"github.com/Sn0wo2/OpenCloudflareCDN/router/static"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
 func Init(router *gin.Engine) {
 	router.Use(gin.Recovery())
 	router.Use(cors.Default())
+	router.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".jpg", ".jpeg", ".png", ".gif", ".webp", ".mp4", ".mp3", ".zip", ".gz", ".br"})))
 	router.Use(errorhandler.Error())
 
 	v0 := router.Group("/v0")
