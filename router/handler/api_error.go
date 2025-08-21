@@ -13,6 +13,6 @@ func APIError() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		log.Instance.Info("E >> Error test", zap.String("ctx", util.GinContextString(ctx)))
 
-		_ = ctx.Error(errors.New("test error"))
+		util.GINError(ctx, errors.New("test error"))
 	}
 }

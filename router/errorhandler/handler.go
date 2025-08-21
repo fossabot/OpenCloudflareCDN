@@ -16,17 +16,17 @@ func Error() gin.HandlerFunc {
 		ctx.Next()
 
 		if len(ctx.Errors) > 0 {
-			for _, err := range ctx.Errors {
-				traceID := uuid.NewString()
+			traceID := uuid.NewString()
 
+			for _, err := range ctx.Errors {
 				log.Instance.Error("EH >> Error handler caught error",
 					zap.String("traceID", traceID),
 					zap.Error(err.Err),
 					zap.String("ctx", util.GinContextString(ctx)),
 				)
-
-				response.New("oops, something went wrong", gin.H{"traceID": traceID}).Write(ctx, http.StatusInternalServerError)
 			}
+
+			response.New("oops, something went wrong", gin.H{"traceID": traceID}).Write(ctx, http.StatusInternalServerError)
 		}
 	}
 }

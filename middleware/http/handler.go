@@ -4,6 +4,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/Sn0wo2/OpenCloudflareCDN/internal/util"
 	"github.com/Sn0wo2/OpenCloudflareCDN/log"
 	"github.com/Sn0wo2/OpenCloudflareCDN/response"
 	"github.com/gin-gonic/gin"
@@ -12,23 +13,29 @@ import (
 
 func Handler(httpsPort string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		host, _, err := net.SplitHostPort(ctx.Request.Host)
+		req := ctx.Request
+
+		hostOnly, _, err := net.SplitHostPort(req.Host)
 		if err != nil {
-			host = ctx.Request.Host
+			hostOnly = req.Host
 		}
 
-		targetHost := host
+		targetHost := hostOnly
 		if httpsPort != "" && httpsPort != "443" {
-			targetHost = net.JoinHostPort(host, httpsPort)
+			targetHost = net.JoinHostPort(hostOnly, httpsPort)
 		}
 
-		targetURL := "https://" + targetHost + ctx.Request.RequestURI
-		log.Instance.Info("Redirecting to HTTPS", zap.String("url", targetURL))
-		ctx.Header("Location", targetURL)
+		u := *req.URL
+		u.Scheme = "https"
+		u.Host = targetHost
+
+		target := u.String()
+		log.Instance.Info("Redirecting to HTTPS", zap.String("url", target), zap.String("ctx", util.GinContextString(ctx)))
+		ctx.Header("Location", target)
 		response.New(
 			"follow url to https",
 			gin.H{
-				"url": targetURL,
+				"url": target,
 			},
 		).Write(ctx, http.StatusPermanentRedirect)
 	}

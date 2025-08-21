@@ -19,12 +19,8 @@ func Proxy() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenStr, err := ctx.Cookie("__ocfc_v")
 		if err != nil {
-			log.Instance.Info("P >> No token, not proxying",
-				zap.String("ctx", util.GinContextString(ctx)),
-				zap.Error(err),
-			)
+			util.GINError(ctx, err)
 			ctx.Next()
-
 			return
 		}
 
@@ -36,14 +32,17 @@ func Proxy() gin.HandlerFunc {
 			return util.StringToBytes(config.Instance.JWTSecret), nil
 		})
 		if err != nil || !t.Valid {
-			log.Instance.Error("P >> Invalid token, not proxying",
-				zap.String("token", tokenStr),
-				zap.String("ctx", util.GinContextString(ctx)),
-			)
+			f := []zap.Field{zap.String("token", tokenStr)}
 
 			if err != nil {
-				_ = ctx.Error(err)
+				f = append(f, zap.Error(err))
 			}
+
+			f = append(f, zap.String("ctx", util.GinContextString(ctx)))
+
+			log.Instance.Error("P >> Invalid token, not proxying",
+				f...,
+			)
 
 			ctx.Next()
 
@@ -52,7 +51,7 @@ func Proxy() gin.HandlerFunc {
 
 		claims, ok := t.Claims.(jwt.MapClaims)
 		if !ok {
-			log.Instance.Error("P >> Invalid token claims, not proxying", zap.String("ctx", util.GinContextString(ctx)))
+			util.GINError(ctx, err)
 			ctx.Next()
 
 			return
@@ -77,8 +76,8 @@ func Proxy() gin.HandlerFunc {
 
 		remote, err := url.Parse(config.Instance.OriginalServer)
 		if err != nil {
-			_ = ctx.Error(err)
-
+			util.GINError(ctx, err)
+			ctx.Next()
 			return
 		}
 
