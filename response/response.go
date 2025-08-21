@@ -3,7 +3,10 @@ package response
 import (
 	"net/http"
 
+	"github.com/Sn0wo2/OpenCloudflareCDN/internal/util"
+	"github.com/Sn0wo2/OpenCloudflareCDN/log"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type Response struct {
@@ -36,5 +39,11 @@ func (r *Response) Write(ctx *gin.Context, status ...int) {
 		s = status[0]
 	}
 
-	ctx.JSON(s, r)
+	if !ctx.Writer.Written() {
+		ctx.JSON(s, r)
+	} else {
+		log.Instance.Warn("Duplicate response write attempt",
+			zap.String("ctx", util.GinContextString(ctx)))
+	}
+	ctx.Abort()
 }
