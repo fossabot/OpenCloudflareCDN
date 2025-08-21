@@ -17,12 +17,14 @@ func Init(router *gin.Engine) {
 	router.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".jpg", ".jpeg", ".png", ".gif", ".webp", ".mp4", ".mp3", ".zip", ".gz", ".br"})))
 	router.Use(errorhandler.Error())
 
-	v0 := router.Group("/v0")
+	api := router.Group("/oofc-api")
+
+	v0 := api.Group("/v0")
 	{
 		v0.Any("/error", handler.APIError())
 	}
 
-	v1 := router.Group("/v1")
+	v1 := api.Group("/v1")
 	{
 		v1.Any("/health", handler.APIHealth())
 		v1.Any("/info", handler.APIInfo())
