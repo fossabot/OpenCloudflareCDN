@@ -15,7 +15,10 @@ import (
 func APIInfo() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		rayIDBytes := make([]byte, 16)
+
+		// this error always nil
 		_, _ = rand.Read(rayIDBytes)
+
 		rayID := hex.EncodeToString(rayIDBytes)
 
 		log.Instance.Info("I >> Info request", zap.String("rayID", rayID), zap.String("ctx", util.GinContextString(ctx)))
