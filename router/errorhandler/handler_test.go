@@ -59,7 +59,7 @@ func TestError_MultipleErrors(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.Contains(t, w.Body.String(), "oops, something went wrong")
 	assert.Contains(t, w.Body.String(), "traceID")
-	assert.Len(t, w.Result().Header.Get("Content-Type"), 1)
+	assert.Len(t, w.Result().Header.Get("Content-Type"), 31)
 }
 
 func TestError_NoErrors(t *testing.T) {
