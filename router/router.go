@@ -17,7 +17,7 @@ func Init(router *gin.Engine) {
 	router.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".jpg", ".jpeg", ".png", ".gif", ".webp", ".mp4", ".mp3", ".zip", ".gz", ".br"})))
 	router.Use(errorhandler.Error())
 
-	api := router.Group("/oofc-api")
+	api := router.Group("/ocfc-api")
 
 	v0 := api.Group("/v0")
 	{
