@@ -9,7 +9,7 @@ async function safeJsonParse<T>(res: globalThis.Response): Promise<T | null> {
     }
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/oofc-api/';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/ocfc-api/';
 
 export const Verify = async (
     payload: VerifyPayload
