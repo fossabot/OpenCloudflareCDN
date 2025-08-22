@@ -42,7 +42,7 @@ func executeStep(description string, command string, args ...string) {
 func main() {
 	lastTag, err := runCmd("git", "describe", "--tags", "--abbrev=0")
 	if err != nil {
-		panic(err)
+		fmt.Printf("failed to get previous tag %v", err)
 	}
 
 	if lastTag == "" {
