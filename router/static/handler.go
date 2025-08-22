@@ -19,12 +19,14 @@ func Handle() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if ctx.Request.Method != http.MethodGet {
 			ctx.Next()
+
 			return
 		}
 
 		staticRoot := config.Instance.StaticPath
 		if staticRoot == "" {
 			util.GINError(ctx, errors.New("static path is empty"))
+
 			return
 		}
 
@@ -42,6 +44,7 @@ func Handle() gin.HandlerFunc {
 		if filePath == "" {
 			util.GINError(ctx, errors.New("static path not found"))
 			ctx.Next()
+
 			return
 		}
 
@@ -49,14 +52,16 @@ func Handle() gin.HandlerFunc {
 		if contentType == "" {
 			contentType = "application/octet-stream"
 		}
+
 		if strings.HasPrefix(contentType, "text/") && !strings.Contains(contentType, "charset") {
 			contentType += "; charset=utf-8"
 		}
 
-		fileContent, err := os.ReadFile(filePath)
+		fileContent, err := os.ReadFile(filePath) //nolint:gosec
 		if err != nil {
 			util.GINError(ctx, err)
 			ctx.Next()
+
 			return
 		}
 

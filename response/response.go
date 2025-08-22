@@ -45,5 +45,6 @@ func (r *Response) Write(ctx *gin.Context, status ...int) {
 		log.Instance.Warn("Duplicate response write attempt",
 			zap.String("ctx", util.GinContextString(ctx)))
 	}
+
 	ctx.Abort()
 }

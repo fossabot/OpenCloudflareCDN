@@ -21,6 +21,7 @@ func APIVerify() gin.HandlerFunc {
 		bodyBytes, err := io.ReadAll(ctx.Request.Body)
 		if err != nil {
 			util.GINError(ctx, err)
+
 			return
 		}
 
@@ -31,6 +32,7 @@ func APIVerify() gin.HandlerFunc {
 		resp, err := http.PostForm("https://challenges.cloudflare.com/turnstile/v0/siteverify", url.Values{"secret": {config.Instance.TurnstileSecretKey}, "response": {res.Get("token").String()}})
 		if err != nil {
 			util.GINError(ctx, err)
+
 			return
 		}
 
@@ -54,6 +56,7 @@ func APIVerify() gin.HandlerFunc {
 				zap.String("ctx", util.GinContextString(ctx)),
 			)
 			response.New("failed", gin.H{"ec": result.Get("error-codes").String()}).Write(ctx, http.StatusBadRequest)
+
 			return
 		}
 
@@ -67,6 +70,7 @@ func APIVerify() gin.HandlerFunc {
 		}).SignedString(util.StringToBytes(config.Instance.JWTSecret))
 		if err != nil {
 			util.GINError(ctx, err)
+
 			return
 		}
 

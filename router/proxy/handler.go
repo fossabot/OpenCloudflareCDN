@@ -21,6 +21,7 @@ func Proxy() gin.HandlerFunc {
 		if err != nil {
 			util.GINError(ctx, err)
 			ctx.Next()
+
 			return
 		}
 
@@ -78,6 +79,7 @@ func Proxy() gin.HandlerFunc {
 		if err != nil {
 			util.GINError(ctx, err)
 			ctx.Next()
+
 			return
 		}
 
