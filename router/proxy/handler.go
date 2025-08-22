@@ -17,7 +17,7 @@ import (
 
 func Proxy() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		tokenStr, err := ctx.Cookie("__ocfc_v")
+		tokenStr, err := ctx.Cookie("ocfc_v")
 		if err != nil {
 			util.GINError(ctx, err)
 			ctx.Next()

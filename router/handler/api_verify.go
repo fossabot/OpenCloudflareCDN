@@ -74,7 +74,7 @@ func APIVerify() gin.HandlerFunc {
 			return
 		}
 
-		ctx.SetCookie("__ocfc_v", tokenStr, int(age.Seconds()), "", "", false, true)
+		ctx.SetCookie("ocfc_v", tokenStr, int(age.Seconds()), "", "", false, true)
 
 		log.Instance.Info("V >> Turnstile verification success", zap.String("rayID", res.Get("rayID").String()), zap.String("ctx", util.GinContextString(ctx)))
 
