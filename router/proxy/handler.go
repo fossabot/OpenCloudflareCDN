@@ -19,7 +19,7 @@ func Proxy() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenStr, err := ctx.Cookie("ocfc_v")
 		if err != nil {
-			util.GINError(ctx, err)
+			log.Instance.Warn("No ocfc_v cookie", zap.String("ctx", util.GinContextString(ctx)))
 			ctx.Next()
 
 			return
@@ -36,6 +36,7 @@ func Proxy() gin.HandlerFunc {
 			f := []zap.Field{zap.String("token", tokenStr)}
 
 			if err != nil {
+				util.GINError(ctx, err)
 				f = append(f, zap.Error(err))
 			}
 
