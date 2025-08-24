@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/Sn0wo2/OpenCloudflareCDN/router/errorhandler"
 	"github.com/Sn0wo2/OpenCloudflareCDN/router/handler"
+	"github.com/Sn0wo2/OpenCloudflareCDN/router/methodnotallowed"
 	"github.com/Sn0wo2/OpenCloudflareCDN/router/notfound"
 	"github.com/Sn0wo2/OpenCloudflareCDN/router/proxy"
 	"github.com/Sn0wo2/OpenCloudflareCDN/router/static"
@@ -21,14 +22,14 @@ func Init(router *gin.Engine) {
 
 	v0 := api.Group("/v0")
 	{
-		v0.Any("/error", handler.APIError())
+		v0.GET("/error", handler.APIError())
 	}
 
 	v1 := api.Group("/v1")
 	{
-		v1.Any("/health", handler.APIHealth())
-		v1.Any("/info", handler.APIInfo())
-		v1.Any("/verify", handler.APIVerify())
+		v1.GET("/health", handler.APIHealth())
+		v1.GET("/info", handler.APIInfo())
+		v1.POST("/verify", handler.APIVerify())
 	}
 
 	router.NoRoute(func(ctx *gin.Context) {
@@ -43,7 +44,7 @@ func Init(router *gin.Engine) {
 		if ctx.Writer.Written() {
 			return
 		}
-
-		notfound.Handler()(ctx)
 	})
+	router.NoRoute(notfound.Handler())
+	router.NoMethod(methodnotallowed.Handler())
 }

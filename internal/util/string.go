@@ -1,6 +1,8 @@
 package util
 
 import (
+	"net/http"
+	"strings"
 	"unsafe"
 )
 
@@ -22,4 +24,13 @@ func TitleCase(s string) string {
 	}
 
 	return s
+}
+
+func GetStatusText(status int, msg ...string) string {
+	var m string
+	if len(msg) == 0 {
+		m = http.StatusText(status)
+	}
+	m = strings.ToLower(m)
+	return m
 }
