@@ -28,8 +28,8 @@ importers:
         version: 15.7.1(i18next@25.4.0(typescript@5.9.2))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(typescript@5.9.2)
     devDependencies:
       '@eslint/js':
-        specifier: ^9.33.0
-        version: 9.33.0
+        specifier: ^9.34.0
+        version: 9.34.0
       '@types/node':
         specifier: ^24.3.0
         version: 24.3.0
